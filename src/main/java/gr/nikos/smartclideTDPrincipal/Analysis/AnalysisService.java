@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 
 import gr.nikos.smartclideTDPrincipal.SmartclideTdPrincipalApplication;
@@ -115,4 +118,146 @@ public class AnalysisService {
 		return null;
 	}
 
+	/**
+	 * Get all the issues for the SonarQube API
+	 * @param projectKey the project key
+	 * @return
+	 */
+	public List<Issue> getIssues(String projectKey) {
+		//initialization
+		Metric[] metrics= getMeasures(projectKey);
+		int totalCodeSmells;
+		if(metrics[0].getName().equals("code_smells"))
+			totalCodeSmells=metrics[0].getValue();
+		else
+			totalCodeSmells=metrics[1].getValue();
+		int page= (totalCodeSmells-1)/500 + 1;
+		List<Issue> issuesList =new ArrayList<Issue>();
+		
+		//if there are more than limit of API 10,000 split 
+        if(totalCodeSmells>10000){
+        	int issuesN= getIssuesNumbers(projectKey, "&resolved=false&severities=INFO");
+            page= (issuesN-1)/500 + 1;
+            if(issuesN>0){
+                for(int i=1; i<=page; i++){
+                	issuesList.addAll(getIssuesFromPage(projectKey, 1, "&resolved=false&severities=INFO"));
+                }
+            }
+            
+            issuesN= getIssuesNumbers(projectKey, "&resolved=false&severities=MINOR,MAJOR,CRITICAL,BLOCKER");
+            page= (issuesN-1)/500 + 1;
+            if(issuesN>0 && issuesN<10000){
+                for(int i=1; i<=page; i++){
+                	issuesList.addAll(getIssuesFromPage(projectKey, i, "&resolved=false&severities=MINOR,MAJOR,CRITICAL,BLOCKER"));
+                }
+            }
+            // if again more than 10,000, then split again
+            else if(issuesN>1000){
+                page= (getIssuesNumbers(projectKey, "&resolved=false&severities=MINOR,MAJOR")-1)/500 + 1;
+                for(int i=1; i<=page; i++){
+                	issuesList.addAll(getIssuesFromPage(projectKey, 1, "&resolved=false&severities=MINOR,MAJOR"));
+                }
+                
+                page= (getIssuesNumbers(projectKey, "&resolved=false&severities=CRITICAL,BLOCKER")-1)/500 + 1;
+                for(int i=1; i<=page; i++){
+                	issuesList.addAll(getIssuesFromPage(projectKey, i, "&resolved=false&severities=CRITICAL,BLOCKER"));
+                }
+            }
+        }
+        else{   //if rules less than 10,000 then all together
+            for(int i=1; i<=page; i++){
+            	issuesList.addAll(getIssuesFromPage(projectKey, i, "&resolved=false"));
+            }
+        }
+        
+		return issuesList;
+	}
+	
+	/**
+     * Get number of issues for a specific API call
+     * @param extra the severities we want each time
+     */
+    private int getIssuesNumbers(String projectKey, String extra){
+    	try {
+            URL url = new URL(SmartclideTdPrincipalApplication.SonarQubeURL + "/api/issues/search?pageSize=500&componentKeys="
+				        +projectKey+"&types=CODE_SMELL"+extra+"&p=1");
+			
+            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+            int responsecode = conn.getResponseCode();
+            if(responsecode != 200)
+                throw new RuntimeException("HttpResponseCode: "+responsecode);
+            else{
+                Scanner sc = new Scanner(url.openStream());
+                String inline="";
+                while(sc.hasNext()){
+                    inline+=sc.nextLine();
+                }
+                String number =inline.split(",",2)[0].replace("{\"total\":", "");
+                sc.close();
+                return Integer.parseInt(number);
+            }
+    	} catch (IOException e) {
+			e.printStackTrace();
+		}
+        return 0;
+    }
+    
+    /**
+     * Get Issues From Sonar API
+     * @param projectKey the key of the Project
+     * @param page the results
+     * @param extra extra filtering
+     */
+    private List<Issue> getIssuesFromPage(String projectKey, int page, String extra){
+        try {
+            URL url = new URL(SmartclideTdPrincipalApplication.SonarQubeURL + "/api/issues/search?ps=500&componentKeys="
+                    +projectKey+"&types=CODE_SMELL"+extra+"&p="+page);
+            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+            int responsecode = conn.getResponseCode();
+            if(responsecode != 200)
+                throw new RuntimeException("HttpResponseCode: "+responsecode);
+            else{
+                Scanner sc = new Scanner(url.openStream());
+                String inline="";
+                while(sc.hasNext()){
+                    inline+=sc.nextLine();
+                }
+                sc.close();
+                List<Issue> issuesList = new ArrayList<Issue>();
+                
+                JSONParser parse = new JSONParser();
+                JSONObject jobj = (JSONObject)parse.parse(inline);
+                JSONArray jsonarr_1 = (JSONArray) jobj.get("issues");
+                for(int i=0;i<jsonarr_1.size();i++){
+                    JSONObject jsonobj_1 = (JSONObject)jsonarr_1.get(i);
+                    JSONObject jsonobj_2=(JSONObject)jsonobj_1.get("textRange");
+                    Issue issue;
+                    String debt;
+                    if(jsonobj_1.get("debt") == null)
+                    	debt = "0min";
+                    else
+                    	debt = jsonobj_1.get("debt").toString();
+                    if(jsonobj_2 != null)
+                    	issue=new Issue(jsonobj_1.get("rule").toString(), jsonobj_1.get("message").toString()
+                            , jsonobj_1.get("severity").toString(), debt
+                            , jsonobj_1.get("type").toString(), jsonobj_1.get("component").toString()
+                            , jsonobj_2.get("startLine").toString(), jsonobj_2.get("endLine").toString());
+                    else
+                    	issue=new Issue(jsonobj_1.get("rule").toString(), jsonobj_1.get("message").toString()
+                                , jsonobj_1.get("severity").toString(), jsonobj_1.get("debt").toString()
+                                , jsonobj_1.get("type").toString(), jsonobj_1.get("component").toString()
+                                , "0", "1");
+                    issuesList.add(issue);
+                }
+                return issuesList;
+            }
+        } catch (IOException|ParseException e) {
+			e.printStackTrace();
+		}
+		return null;
+    }
 }

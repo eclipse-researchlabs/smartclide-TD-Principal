@@ -1,5 +1,7 @@
 package gr.nikos.smartclideTDPrincipal.Analysis;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,11 @@ public class AnalysisController {
 	@GetMapping(path="{projectKey}/measures")
 	public Metric[] getMeasures(@PathVariable(value = "projectKey") String projectKey) {
 		return analysisService.getMeasures(projectKey);
+	}
+
+	@GetMapping(path="{projectKey}/issues")
+	public List<Issue> getIssues(@PathVariable(value = "projectKey") String projectKey) {
+		return analysisService.getIssues(projectKey);
 	}
 	
 	@PostMapping
