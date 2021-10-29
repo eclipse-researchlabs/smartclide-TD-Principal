@@ -16,6 +16,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import gr.nikos.smartclideTDPrincipal.SmartclideTdPrincipalApplication;
@@ -23,6 +24,8 @@ import gr.nikos.smartclideTDPrincipal.SmartclideTdPrincipalApplication;
 @Service
 public class AnalysisService {
 	
+	@Value("${gr.nikos.smartclide.sonarqube.url}")
+	private String sonarQubeUrl;
 	
 	/**
 	 * Start a new Sonar analysis 
@@ -82,7 +85,7 @@ public class AnalysisService {
 	public Metric[] getMeasures(String projectKey) {
 		try {
 			Metric[] metrics= new Metric[2];
-            URL url = new URL(SmartclideTdPrincipalApplication.SonarQubeURL + "/api/measures/component?component="+projectKey+
+            URL url = new URL(sonarQubeUrl + "/api/measures/component?component="+projectKey+
 				                "&metricKeys=sqale_index,code_smells");
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("GET");
@@ -179,7 +182,7 @@ public class AnalysisService {
      */
     private int getIssuesNumbers(String projectKey, String extra){
     	try {
-            URL url = new URL(SmartclideTdPrincipalApplication.SonarQubeURL + "/api/issues/search?pageSize=500&componentKeys="
+            URL url = new URL(sonarQubeUrl + "/api/issues/search?pageSize=500&componentKeys="
 				        +projectKey+"&types=CODE_SMELL"+extra+"&p=1");
 			
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
@@ -212,7 +215,7 @@ public class AnalysisService {
      */
     private List<Issue> getIssuesFromPage(String projectKey, int page, String extra){
         try {
-            URL url = new URL(SmartclideTdPrincipalApplication.SonarQubeURL + "/api/issues/search?ps=500&componentKeys="
+            URL url = new URL(sonarQubeUrl + "/api/issues/search?ps=500&componentKeys="
                     +projectKey+"&types=CODE_SMELL"+extra+"&p="+page);
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("GET");
