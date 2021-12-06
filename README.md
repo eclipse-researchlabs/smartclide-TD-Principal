@@ -4,6 +4,7 @@ The backend service that start new analysis for the calculation of the TD Princi
 This component a is REST API implemented in Spring Boot.
 - port 8555
 - Τhe URL of the sonarqube instance can be changed via the environment variable GR_NIKOS_SMARTCLIDE_SONARQUBE_URL (default: http://localhost:9000)
+- OpenAPI with Swagger UI (/api and /api-ui)
 
 ### (Get) Project Measures
 ##### Mandatory PathVariable:
