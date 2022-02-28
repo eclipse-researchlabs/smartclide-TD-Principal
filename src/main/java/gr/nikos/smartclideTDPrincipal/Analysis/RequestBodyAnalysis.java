@@ -28,6 +28,11 @@ public class RequestBodyAnalysis {
 		String[] temp= this.gitURL.split("/");
 		return temp[temp.length-1];
 	}
+
+	public String getGitOwner() {
+		String[] temp= this.gitURL.split("/");
+		return temp[temp.length-2];
+	}
 	
 	public String getGitURL() {
 		return gitURL;

@@ -69,8 +69,8 @@ public class AnalysisService {
 	        
 	        //create sonar-project.properties
 	        BufferedWriter writer = new BufferedWriter(new FileWriter("/tmp/"+ requestBodyAnalysis.getGitName()+ "/sonar-project.properties"));
-            writer.write("sonar.projectKey=" + requestBodyAnalysis.getGitName() + System.lineSeparator());
-            writer.append("sonar.projectName=" + requestBodyAnalysis.getGitName() + System.lineSeparator());
+            writer.write("sonar.projectKey=" + requestBodyAnalysis.getGitOwner() +":"+ requestBodyAnalysis.getGitName() + System.lineSeparator());
+            writer.append("sonar.projectName=" + requestBodyAnalysis.getGitOwner() +":"+ requestBodyAnalysis.getGitName() + System.lineSeparator());
             writer.append("sonar.sourceEncoding=UTF-8" + System.lineSeparator());
             writer.append("sonar.sources=." + System.lineSeparator());
             writer.append("sonar.java.binaries=." + System.lineSeparator());
