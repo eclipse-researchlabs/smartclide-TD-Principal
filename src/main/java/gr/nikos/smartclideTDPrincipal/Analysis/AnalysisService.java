@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import gr.nikos.smartclideTDPrincipal.SmartclideTdPrincipalApplication;
+import org.springframework.util.FileSystemUtils;
 
 @Service
 public class AnalysisService {
@@ -88,6 +89,9 @@ public class AnalysisService {
 	        while ((line2 = reader2.readLine()) != null) {
 	            System.out.println(line2);
 	        }
+
+            //delete clone
+            FileSystemUtils.deleteRecursively(new File("/tmp/"+requestBodyAnalysis.getGitName()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

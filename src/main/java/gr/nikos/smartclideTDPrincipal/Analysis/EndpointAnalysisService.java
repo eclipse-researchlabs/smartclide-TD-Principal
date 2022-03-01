@@ -14,6 +14,7 @@ import gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities.MethodDecl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.*;
 import java.util.*;
@@ -109,6 +110,10 @@ public class EndpointAnalysisService {
                     hashMap.put(annotationPath+" | "+md.getName().toString(),new Metric("TD", total));
                 }
             }
+
+            //delete clone
+            FileSystemUtils.deleteRecursively(new File("/"+gitName));
+
             return  hashMap;
         } catch (IOException e) {
             e.printStackTrace();
