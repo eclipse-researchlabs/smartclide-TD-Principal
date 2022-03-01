@@ -10,6 +10,7 @@ package gr.nikos.smartclideTDPrincipal.Analysis;
  * SPDX-License-Identifier: EPL-2.0
  */
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class AnalysisController {
 	@Autowired
 	private AnalysisService analysisService;
 
+	@Autowired
+	private EndpointAnalysisService endpointAnalysisService;
+
 	@CrossOrigin(origins = "*")
 	@GetMapping(path="{projectKey}/measures")
 	public Metric[] getMeasures(@PathVariable(value = "projectKey") String projectKey) {
@@ -35,6 +39,12 @@ public class AnalysisController {
 	@GetMapping(path="{projectKey}/issues")
 	public List<Issue> getIssues(@PathVariable(value = "projectKey") String projectKey) {
 		return analysisService.getIssues(projectKey);
+	}
+
+	@CrossOrigin(origins = "*")
+	@GetMapping(path="endpoints")
+	public HashMap<String,Metric> getEndpointMetrics(@RequestParam(required = true) String url) {
+		return endpointAnalysisService.getEnpointMetrics(url);
 	}
 
 	@CrossOrigin(origins = "*")
