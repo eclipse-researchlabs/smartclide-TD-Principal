@@ -33,6 +33,7 @@ public class EndpointAnalysisService {
 
     public HashMap<String,Metric> getEnpointMetrics(String url) {
         try {
+            methodsOfStartingEndpoints.clear();
             HashMap<String,Metric> hashMap=new HashMap<>();
 
             //Get all issues
