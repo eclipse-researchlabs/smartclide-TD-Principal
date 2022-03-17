@@ -31,10 +31,10 @@ public class EndpointAnalysisService {
 
     private HashMap<MethodDeclaration, String> methodsOfStartingEndpoints= new HashMap<>();
 
-    public HashMap<String,Metric> getEnpointMetrics(String url) {
+    public HashMap<String,Report> getEnpointMetrics(String url) {
         try {
             methodsOfStartingEndpoints.clear();
-            HashMap<String,Metric> hashMap=new HashMap<>();
+            HashMap<String,Report> hashMap=new HashMap<>();
 
             //Get all issues
             String[] temp= url.split("/");
@@ -108,7 +108,7 @@ public class EndpointAnalysisService {
                         }
                     }
 
-                    hashMap.put(annotationPath+" | "+md.getName().toString(),new Metric("TD", total));
+                    hashMap.put(annotationPath+" | "+md.getName().toString(),new Report(new Metric("TD", total), endpointIssues));
                 }
             }
 

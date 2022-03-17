@@ -43,7 +43,7 @@ public class AnalysisController {
 
 	@CrossOrigin(origins = "*")
 	@GetMapping(path="endpoints")
-	public HashMap<String,Metric> getEndpointMetrics(@RequestParam(required = true) String url) {
+	public HashMap<String,Report> getEndpointMetrics(@RequestParam(required = true) String url) {
 		return endpointAnalysisService.getEnpointMetrics(url);
 	}
 
