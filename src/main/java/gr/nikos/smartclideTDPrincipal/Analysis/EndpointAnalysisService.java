@@ -2,8 +2,6 @@ package gr.nikos.smartclideTDPrincipal.Analysis;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitor;
@@ -34,13 +32,11 @@ public class EndpointAnalysisService {
     public HashMap<String,Report> getEnpointMetrics(String url) {
         try {
             methodsOfStartingEndpoints.clear();
-            HashMap<String,Report> hashMap=new HashMap<>();
 
             //Get all issues
             String[] temp= url.split("/");
             String gitName= temp[temp.length-1];
             String projectKey= temp[temp.length-2]+":"+temp[temp.length-1];
-            List<Issue> allIssues= analysisService.getIssues(projectKey);
 
             //clone
             ProcessBuilder pbuilder1 = new ProcessBuilder("bash", "-c", "git clone " + url);
@@ -52,65 +48,15 @@ public class EndpointAnalysisService {
             }
 
             // Get Mappings
+            System.out.println("Get all endpoints");
             try {
                 getMappingsFromAllFiles(new File("/"+gitName));
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            //For each mapping method
-            HashMap<MethodDeclaration, List<Issue>> issuesOfEndPoints= new HashMap<>();
-            for(MethodDeclaration md: methodsOfStartingEndpoints.keySet()){
-                //parse and find call tree
-                InvestigatorFacade facade = new InvestigatorFacade("/"+gitName, methodsOfStartingEndpoints.get(md), md);
-                Set<MethodCallSet> methodCallSets = facade.start();
-                if (!Objects.isNull(methodCallSets)){
-                    printResults(methodCallSets);
-                    List<Issue> endpointIssues = new ArrayList<Issue>();
-
-                    for (MethodCallSet methodCallSet : methodCallSets) {
-                        //For each method called
-                        for (MethodDecl methodCall : methodCallSet.getMethodCalls()) {
-                            //Get issues in this file
-                            List<Issue> filteredList = new ArrayList<Issue>();
-                            filteredList = allIssues.stream()
-                                    .filter(issue -> issue.getIssueDirectory().replace(projectKey+":", "").equals(methodCall.getFilePath()))
-                                    .collect(Collectors.toList());
-
-                            //For each issue
-                            for(Issue issue: filteredList) {
-                                int startIssueLine = Integer.parseInt(issue.getIssueStartLine());
-                                if(methodCall.getCodeRange().getStartLine() <= startIssueLine &&
-                                            methodCall.getCodeRange().getEndLine() >= startIssueLine){
-                                    endpointIssues.add(issue);
-                                }
-                            }
-                        }
-                    }
-
-                    //Add all issues of endpoint
-                    issuesOfEndPoints.put(md, endpointIssues);
-                    int total = 0;
-                    for(Issue issue: endpointIssues){
-                        String debtInString =issue.getIssueDebt();
-                        if(debtInString.contains("h")){
-                            String hoursInString = debtInString.split("h")[0];
-                            int hours = Integer.parseInt(hoursInString) *60;
-                            debtInString = hours+"min";
-                        }
-                        total += Integer.parseInt(debtInString.replace("min", ""));
-                    }
-
-                    String annotationPath="";
-                    for(AnnotationExpr n: md.getAnnotations()){
-                        if(n.getName().asString().contains("Mapping")){
-                            annotationPath= n.toString();
-                        }
-                    }
-
-                    hashMap.put(annotationPath+" | "+md.getName().toString(),new Report(new Metric("TD", total), endpointIssues));
-                }
-            }
+            //Get Report
+            HashMap<String, Report> hashMap= GetAllReportForAllEndpoints(gitName, projectKey);
 
             //delete clone
             FileSystemUtils.deleteRecursively(new File("/"+gitName));
@@ -120,6 +66,66 @@ public class EndpointAnalysisService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    //Start method tracing and map the issues to endpoints
+    private HashMap<String, Report> GetAllReportForAllEndpoints(String dirName, String projectKey) {
+        System.out.println("Get all Issues");
+        List<Issue> allIssues= analysisService.getIssues(projectKey);
+        HashMap<String,Report> hashMap=new HashMap<>();
+        //For each mapping method
+        System.out.println("Start method trace");
+        for(MethodDeclaration md: methodsOfStartingEndpoints.keySet()){
+            //parse and find call tree
+            InvestigatorFacade facade = new InvestigatorFacade("/"+ dirName, methodsOfStartingEndpoints.get(md), md);
+            Set<MethodCallSet> methodCallSets = facade.start();
+            if (!Objects.isNull(methodCallSets)){
+                printResults(methodCallSets);
+                List<Issue> endpointIssues = new ArrayList<Issue>();
+
+                for (MethodCallSet methodCallSet : methodCallSets) {
+                    //For each method called
+                    for (MethodDecl methodCall : methodCallSet.getMethodCalls()) {
+                        //Get issues in this file
+                        List<Issue> filteredList = new ArrayList<Issue>();
+                        filteredList = allIssues.stream()
+                                .filter(issue -> issue.getIssueDirectory().replace(projectKey +":", "").equals(methodCall.getFilePath()))
+                                .collect(Collectors.toList());
+
+                        //For each issue
+                        for(Issue issue: filteredList) {
+                            int startIssueLine = Integer.parseInt(issue.getIssueStartLine());
+                            if(methodCall.getCodeRange().getStartLine() <= startIssueLine &&
+                                        methodCall.getCodeRange().getEndLine() >= startIssueLine){
+                                endpointIssues.add(issue);
+                            }
+                        }
+                    }
+                }
+
+                //Add all issues of endpoint
+                int total = 0;
+                for(Issue issue: endpointIssues){
+                    String debtInString =issue.getIssueDebt();
+                    if(debtInString.contains("h")){
+                        String hoursInString = debtInString.split("h")[0];
+                        int hours = Integer.parseInt(hoursInString) *60;
+                        debtInString = hours+"min";
+                    }
+                    total += Integer.parseInt(debtInString.replace("min", ""));
+                }
+
+                String annotationPath="";
+                for(AnnotationExpr n: md.getAnnotations()){
+                    if(n.getName().asString().contains("Mapping")){
+                        annotationPath= n.toString();
+                    }
+                }
+
+                hashMap.put(annotationPath+" | "+md.getName().toString(),new Report(new Metric("TD", total), endpointIssues));
+            }
+        }
+        return hashMap;
     }
 
     //For each file find endpoints
