@@ -43,9 +43,21 @@ public class AnalysisController {
 
 	@CrossOrigin(origins = "*")
 	@GetMapping(path="endpoints")
-	public HashMap<String,Report> getEndpointMetrics(@RequestParam(required = true) String url) {
+	public List<Report> getEndpointMetrics(@RequestParam(required = true) String url) {
 		return endpointAnalysisService.getEnpointMetrics(url);
 	}
+
+	@CrossOrigin(origins = "*")
+	@PostMapping(path="endpoints")
+	public List<Report> getEndpointMetricsPrivate(@RequestBody RequestBodyEndpoints requestBodyEndpoints) {
+		return endpointAnalysisService.getEndpointMetricsPrivate(requestBodyEndpoints);
+	}
+
+//	@CrossOrigin(origins = "*")
+//	@PostMapping(path="endpoints")
+//	public HashMap<String,Report> getEndpointMetricsLocalGitlabSonar(@RequestBody RequestBodyEndpoints requestBodyEndpoints) {
+//		return endpointAnalysisService.getEnpointMetricsLocal(requestBodyEndpoints);
+//	}
 
 	@CrossOrigin(origins = "*")
 	@PostMapping
