@@ -3,7 +3,6 @@ package gr.nikos.smartclideTDPrincipal.Analysis;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import gr.nikos.smartclideTDPrincipal.Parser.InvestigatorFacade;
@@ -69,14 +68,18 @@ public class EndpointAnalysisService {
         return null;
     }
 
-    public List<Report> getEndpointMetricsPrivate(RequestBodyEndpoints requestBodyEndpoints) {
+    public List<Report> getEndpointMetricsPrivateManual(RequestBodyEndpointsManual requestBodyEndpoints) {
         try {
             methodsOfStartingEndpoints.clear();
             allJavaFiles.clear();
             String projectKey= requestBodyEndpoints.getSonarQubeProjectKey();
-            String gitUrl= requestBodyEndpoints.getGitUrl().replace("https://","").replace(".git","");
+            Boolean httpsGit= requestBodyEndpoints.getGitUrl().contains("https://");
+            String gitUrl= requestBodyEndpoints.getGitUrl().replace("https://","").replace("http://","").replace(".git","");
             String gitToken= requestBodyEndpoints.getGitToken();
             String url= "https://oauth2:" + gitToken + "@" + gitUrl;
+            if(!httpsGit){
+                url=url.replace("https://","http://");
+            }
             String[] temp= gitUrl.split("/");
             String gitName= temp[temp.length-1];
 
@@ -124,6 +127,54 @@ public class EndpointAnalysisService {
             FileSystemUtils.deleteRecursively(new File("/"+gitName));
 
             return reportList;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<Report> getEndpointMetricsPrivateAuto(RequestBodyEndpoints requestBodyEndpoints) {
+        try {
+            methodsOfStartingEndpoints.clear();
+
+            String projectKey= requestBodyEndpoints.getSonarQubeProjectKey();
+            Boolean httpsGit= requestBodyEndpoints.getGitUrl().contains("https://");
+            String gitUrl= requestBodyEndpoints.getGitUrl().replace("https://","").replace("http://","").replace(".git","");
+            String gitToken= requestBodyEndpoints.getGitToken();
+            String url= "https://" +gitUrl;
+            if(!gitToken.equals("")) {
+                url = "https://oauth2:" + gitToken + "@" + gitUrl;
+            }
+            if(!httpsGit){
+                url=url.replace("https://","http://");
+            }
+            String[] temp= gitUrl.split("/");
+            String gitName= temp[temp.length-1];
+
+            //clone
+            ProcessBuilder pbuilder1 = new ProcessBuilder("bash", "-c", "git clone " + url);
+            Process p1 = pbuilder1.start();
+            BufferedReader reader1 = new BufferedReader(new InputStreamReader(p1.getInputStream()));
+            String line1;
+            while ((line1 = reader1.readLine()) != null) {
+                System.out.println(line1);
+            }
+
+            // Get Mappings
+            System.out.println("Get all endpoints");
+            try {
+                getMappingsFromAllFiles(new File("/"+gitName));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //Get Report
+            List<Report> reportList= GetAllReportForAllEndpoints("/"+gitName, projectKey);
+
+            //delete clone
+            FileSystemUtils.deleteRecursively(new File("/"+gitName));
+
+            return  reportList;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -204,7 +255,7 @@ public class EndpointAnalysisService {
                     methodNameVisitor.visit(cu, methods);
 
                     methods.forEach(n -> {
-                        if (n.getDeclarationAsString().equals(eachEndpoint.getEndpointMethod())) {
+                        if (n.getDeclarationAsString().replaceAll(" ","").equals(eachEndpoint.getEndpointMethod().replaceAll(" ",""))) {
                             System.out.println(n.getDeclarationAsString());
                             methodsOfStartingEndpoints.put(n, file.getAbsolutePath());
                         }
@@ -260,7 +311,11 @@ public class EndpointAnalysisService {
                     !md.getAnnotationByName("PutMapping").isEmpty() ||
                     !md.getAnnotationByName("DeleteMapping").isEmpty() ||
                     !md.getAnnotationByName("PatchMapping").isEmpty() ||
-                    !md.getAnnotationByName("RequestMapping ").isEmpty() ) {
+                    !md.getAnnotationByName("RequestMapping").isEmpty() ||
+                    !md.getAnnotationByName("GET").isEmpty() ||
+                    !md.getAnnotationByName("POST").isEmpty() ||
+                    !md.getAnnotationByName("PUT").isEmpty() ||
+                    !md.getAnnotationByName("DELETE").isEmpty() ) {
                 collector.add(md);
             }
         }

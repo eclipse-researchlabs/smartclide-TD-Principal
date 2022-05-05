@@ -10,7 +10,6 @@ package gr.nikos.smartclideTDPrincipal.Analysis;
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,14 @@ public class AnalysisController {
 
 	@CrossOrigin(origins = "*")
 	@PostMapping(path="endpoints")
-	public List<Report> getEndpointMetricsPrivate(@RequestBody RequestBodyEndpoints requestBodyEndpoints) {
-		return endpointAnalysisService.getEndpointMetricsPrivate(requestBodyEndpoints);
+	public List<Report> getEndpointMetricsPrivateManual(@RequestBody RequestBodyEndpointsManual requestBodyEndpointsManual) {
+		return endpointAnalysisService.getEndpointMetricsPrivateManual(requestBodyEndpointsManual);
+	}
+
+	@CrossOrigin(origins = "*")
+	@PostMapping(path="endpoints/auto")
+	public List<Report> getEndpointMetricsPrivateAuto(@RequestBody RequestBodyEndpoints requestBodyEndpoints) {
+		return endpointAnalysisService.getEndpointMetricsPrivateAuto(requestBodyEndpoints);
 	}
 
 //	@CrossOrigin(origins = "*")
