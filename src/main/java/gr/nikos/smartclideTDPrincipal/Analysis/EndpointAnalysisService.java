@@ -38,13 +38,29 @@ public class EndpointAnalysisService {
             String gitName= temp[temp.length-1];
             String projectKey= temp[temp.length-2]+":"+temp[temp.length-1];
 
-            //clone
+            // Git configuration
+            System.out.println("Clone");
+            ProcessBuilder pbuilderGit = new ProcessBuilder("bash", "-c", "git config --global http.sslverify \"false\"");
+            Process pGit = pbuilderGit.start();
+            BufferedReader inputReaderGit = new BufferedReader(new InputStreamReader(pGit.getInputStream()));
+            String inputLineGit;
+            while ((inputLineGit = inputReaderGit.readLine()) != null) {
+                System.out.println("! " + inputLineGit);
+            }
+
+            // Clone
+            System.out.println("Clone");
             ProcessBuilder pbuilder1 = new ProcessBuilder("bash", "-c", "git clone " + url);
             Process p1 = pbuilder1.start();
-            BufferedReader reader1 = new BufferedReader(new InputStreamReader(p1.getInputStream()));
-            String line1;
-            while ((line1 = reader1.readLine()) != null) {
-                System.out.println(line1);
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(p1.getErrorStream()));
+            String errorLine;
+            while ((errorLine = errorReader.readLine()) != null) {
+                System.out.println("~ " + errorLine);
+            }
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(p1.getInputStream()));
+            String inputLine;
+            while ((inputLine = inputReader.readLine()) != null) {
+                System.out.println("! " + inputLine);
             }
 
             // Get Mappings
@@ -141,23 +157,36 @@ public class EndpointAnalysisService {
             Boolean httpsGit= requestBodyEndpoints.getGitUrl().contains("https://");
             String gitUrl= requestBodyEndpoints.getGitUrl().replace("https://","").replace("http://","").replace(".git","");
             String gitToken= requestBodyEndpoints.getGitToken();
-            String url= "https://" +gitUrl;
-            if(!gitToken.equals("")) {
-                url = "https://oauth2:" + gitToken + "@" + gitUrl;
-            }
+            String url= "https://oauth2:" + gitToken + "@" + gitUrl;
             if(!httpsGit){
                 url=url.replace("https://","http://");
             }
             String[] temp= gitUrl.split("/");
             String gitName= temp[temp.length-1];
 
-            //clone
+            // Git configuration
+            System.out.println("Clone");
+            ProcessBuilder pbuilderGit = new ProcessBuilder("bash", "-c", "git config --global http.sslverify \"false\"");
+            Process pGit = pbuilderGit.start();
+            BufferedReader inputReaderGit = new BufferedReader(new InputStreamReader(pGit.getInputStream()));
+            String inputLineGit;
+            while ((inputLineGit = inputReaderGit.readLine()) != null) {
+                System.out.println("! " + inputLineGit);
+            }
+
+            // Clone
+            System.out.println("Clone");
             ProcessBuilder pbuilder1 = new ProcessBuilder("bash", "-c", "git clone " + url);
             Process p1 = pbuilder1.start();
-            BufferedReader reader1 = new BufferedReader(new InputStreamReader(p1.getInputStream()));
-            String line1;
-            while ((line1 = reader1.readLine()) != null) {
-                System.out.println(line1);
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(p1.getErrorStream()));
+            String errorLine;
+            while ((errorLine = errorReader.readLine()) != null) {
+                System.out.println("~ " + errorLine);
+            }
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(p1.getInputStream()));
+            String inputLine;
+            while ((inputLine = inputReader.readLine()) != null) {
+                System.out.println("! " + inputLine);
             }
 
             // Get Mappings

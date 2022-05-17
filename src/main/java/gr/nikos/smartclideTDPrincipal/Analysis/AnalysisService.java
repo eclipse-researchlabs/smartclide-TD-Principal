@@ -58,15 +58,42 @@ public class AnalysisService {
 	        while ((line = reader.readLine()) != null) {
 	            System.out.println(line);
 	        }
-	        
-	        //clone
-	        ProcessBuilder pbuilder1 = new ProcessBuilder("bash", "-c", "cd tmp; git clone "+requestBodyAnalysis.getGitURL());
-	        Process p1 = pbuilder1.start();
-	        BufferedReader reader1 = new BufferedReader(new InputStreamReader(p1.getInputStream()));
-	        String line1;
-	        while ((line1 = reader1.readLine()) != null) {
-	            System.out.println(line1);
-	        }
+
+            // Git Url
+            Boolean httpsGit= requestBodyAnalysis.getGitURL().contains("https://");
+            String gitUrl= requestBodyAnalysis.getGitURL().replace("https://","").replace("http://","").replace(".git","");
+            String gitToken= requestBodyAnalysis.getToken();
+            String url= "https://oauth2:" + gitToken + "@" + gitUrl;
+            if(!httpsGit){
+                url=url.replace("https://","http://");
+            }
+            String[] temp= gitUrl.split("/");
+            String gitName= temp[temp.length-1];
+
+            // Git configuration
+            System.out.println("Clone");
+            ProcessBuilder pbuilderGit = new ProcessBuilder("bash", "-c", "git config --global http.sslverify \"false\"");
+            Process pGit = pbuilderGit.start();
+            BufferedReader inputReaderGit = new BufferedReader(new InputStreamReader(pGit.getInputStream()));
+            String inputLineGit;
+            while ((inputLineGit = inputReaderGit.readLine()) != null) {
+                System.out.println("! " + inputLineGit);
+            }
+
+            // Clone
+            System.out.println("Clone");
+            ProcessBuilder pbuilder1 = new ProcessBuilder("bash", "-c", "cd tmp; git clone " + url);
+            Process p1 = pbuilder1.start();
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(p1.getErrorStream()));
+            String errorLine;
+            while ((errorLine = errorReader.readLine()) != null) {
+                System.out.println("~ " + errorLine);
+            }
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(p1.getInputStream()));
+            String inputLine;
+            while ((inputLine = inputReader.readLine()) != null) {
+                System.out.println("! " + inputLine);
+            }
 	        
 	        //create sonar-project.properties
 	        BufferedWriter writer = new BufferedWriter(new FileWriter("/tmp/"+ requestBodyAnalysis.getGitName()+ "/sonar-project.properties"));

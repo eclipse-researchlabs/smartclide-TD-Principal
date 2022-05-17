@@ -26,7 +26,7 @@ public class RequestBodyAnalysis {
 
 	public String getGitName() {
 		String[] temp= this.gitURL.split("/");
-		return temp[temp.length-1];
+		return temp[temp.length-1].replace(".git","");
 	}
 
 	public String getGitOwner() {
