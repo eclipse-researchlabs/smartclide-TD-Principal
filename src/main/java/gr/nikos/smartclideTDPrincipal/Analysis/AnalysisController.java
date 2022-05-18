@@ -66,10 +66,9 @@ public class AnalysisController {
 
 	@CrossOrigin(origins = "*")
 	@PostMapping
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> makeNewAnalysis(@RequestBody RequestBodyAnalysis requestBodyAnalysis) {
-		analysisService.startNewAnalysis(requestBodyAnalysis);
-		return new ResponseEntity<>("finished successful", HttpStatus.OK);
+	public String makeNewAnalysis(@RequestBody RequestBodyAnalysis requestBodyAnalysis) {
+		String report = analysisService.startNewAnalysis(requestBodyAnalysis);
+		return report;
 	}
 
 }

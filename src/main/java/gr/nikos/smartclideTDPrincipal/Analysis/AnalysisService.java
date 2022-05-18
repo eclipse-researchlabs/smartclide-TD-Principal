@@ -42,13 +42,15 @@ public class AnalysisService {
 	 * Start a new Sonar analysis 
 	 * @param requestBodyAnalysis the required git parameters
 	 */
-	public void startNewAnalysis(RequestBodyAnalysis requestBodyAnalysis) {
-		try {
+	public String startNewAnalysis(RequestBodyAnalysis requestBodyAnalysis) {
+		String report="";
+        try {
             //setup sonarqube instance to sonarscanner
             FileWriter fstream = new FileWriter("/sonar-scanner-4.6.2.2472-linux/conf/sonar-scanner.properties", false);
             BufferedWriter out = new BufferedWriter(fstream);
             out.write("sonar.host.url="+sonarQubeUrl);
             out.close();
+            report+="sonarQubeUrl:"+sonarQubeUrl+"; ";
 
 			//mkdir
 			ProcessBuilder pbuilder = new ProcessBuilder("bash", "-c", "mkdir -p tmp");
@@ -71,7 +73,7 @@ public class AnalysisService {
             String gitName= temp[temp.length-1];
 
             // Git configuration
-            System.out.println("Clone");
+            System.out.println("Git configuration");
             ProcessBuilder pbuilderGit = new ProcessBuilder("bash", "-c", "git config --global http.sslverify \"false\"");
             Process pGit = pbuilderGit.start();
             BufferedReader inputReaderGit = new BufferedReader(new InputStreamReader(pGit.getInputStream()));
@@ -81,6 +83,7 @@ public class AnalysisService {
             }
 
             // Clone
+            report+="url:"+url+";  ";
             System.out.println("Clone");
             ProcessBuilder pbuilder1 = new ProcessBuilder("bash", "-c", "cd tmp; git clone " + url);
             Process p1 = pbuilder1.start();
@@ -88,14 +91,17 @@ public class AnalysisService {
             String errorLine;
             while ((errorLine = errorReader.readLine()) != null) {
                 System.out.println("~ " + errorLine);
+                report+="~ "+errorLine;
             }
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(p1.getInputStream()));
             String inputLine;
             while ((inputLine = inputReader.readLine()) != null) {
                 System.out.println("! " + inputLine);
+                report+="! "+inputLine;
             }
 	        
 	        //create sonar-project.properties
+            report+="; sonar.projectKey:"+requestBodyAnalysis.getGitOwner() +":"+ requestBodyAnalysis.getGitName()+"; ";
 	        BufferedWriter writer = new BufferedWriter(new FileWriter("/tmp/"+ requestBodyAnalysis.getGitName()+ "/sonar-project.properties"));
             writer.write("sonar.projectKey=" + requestBodyAnalysis.getGitOwner() +":"+ requestBodyAnalysis.getGitName() + System.lineSeparator());
             writer.append("sonar.projectName=" + requestBodyAnalysis.getGitOwner() +":"+ requestBodyAnalysis.getGitName() + System.lineSeparator());
@@ -115,13 +121,19 @@ public class AnalysisService {
 	        System.out.println("start analysis");
 	        while ((line2 = reader2.readLine()) != null) {
 	            System.out.println(line2);
+                report+="! "+line2;
 	        }
+            if(err2.exists()){
+                report+="err2 File; ";
+            }
 
             //delete clone
             FileSystemUtils.deleteRecursively(new File("/tmp/"+requestBodyAnalysis.getGitName()));
 		} catch (IOException e) {
+            report="error::"+e.toString();
 			e.printStackTrace();
 		}
+        return report;
 	}
 
 	/**
