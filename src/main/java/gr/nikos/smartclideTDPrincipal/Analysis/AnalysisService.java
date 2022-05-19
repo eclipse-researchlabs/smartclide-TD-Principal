@@ -45,13 +45,6 @@ public class AnalysisService {
 	public String startNewAnalysis(RequestBodyAnalysis requestBodyAnalysis) {
 		String report="";
         try {
-            //setup sonarqube instance to sonarscanner
-            FileWriter fstream = new FileWriter("/sonar-scanner-4.6.2.2472-linux/conf/sonar-scanner.properties", false);
-            BufferedWriter out = new BufferedWriter(fstream);
-            out.write("sonar.host.url="+sonarQubeUrl);
-            out.close();
-            report+="sonarQubeUrl:"+sonarQubeUrl+"; ";
-
 			//mkdir
 			ProcessBuilder pbuilder = new ProcessBuilder("bash", "-c", "mkdir -p tmp");
 	        Process p = pbuilder.start();
