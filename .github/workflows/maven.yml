@@ -30,7 +30,7 @@ jobs:
           # login to GitHub Container Registry
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin
           # build image
-          docker build . --tag ghcr.io/eclipse-researchlabs/smartclide/tdprincipal:$(date +'%Y-%m-%d')
+          docker build . --tag ghcr.io/eclipse-researchlabs/smartclide/tdprincipal:$(date +'%Y-%m-%d')-1
           # push image
-          docker push ghcr.io/eclipse-researchlabs/smartclide/tdprincipal:$(date +'%Y-%m-%d')
+          docker push ghcr.io/eclipse-researchlabs/smartclide/tdprincipal:$(date +'%Y-%m-%d')-1
 
