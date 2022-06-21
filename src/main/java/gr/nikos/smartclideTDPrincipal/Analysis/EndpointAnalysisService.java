@@ -220,6 +220,7 @@ public class EndpointAnalysisService {
         System.out.println("Start method trace");
         for(MethodDeclaration md: methodsOfStartingEndpoints.keySet()){
             //parse and find call tree
+			System.out.println("methodsOfStartingEndpoints.get(md):"+methodsOfStartingEndpoints.get(md));
             InvestigatorFacade facade = new InvestigatorFacade(dirName, methodsOfStartingEndpoints.get(md), md);
             Set<MethodCallSet> methodCallSets = facade.start();
             if (!Objects.isNull(methodCallSets)){

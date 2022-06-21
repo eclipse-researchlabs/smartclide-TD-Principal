@@ -135,7 +135,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
     private void createMethodCallSets(MethodDeclaration method, MethodCallSet methodCallSet) {
 
         List<String> methodCallExpressionsStr = convertMethodCallExprToString(method.findAll(MethodCallExpr.class));
-        if (methodCallExpressionsStr.isEmpty() || methodCallSet.getMethodCalls().stream().map(MethodDecl::getQualifiedName).collect(Collectors.toList()).containsAll(methodCallExpressionsStr))
+        if (methodCallExpressionsStr.isEmpty() || new HashSet<>(methodCallSet.getMethodCalls().stream().map(MethodDecl::getQualifiedName).collect(Collectors.toList())).containsAll(methodCallExpressionsStr))
             return;
 
         for (MethodCallExpr methodCallExpr : method.findAll(MethodCallExpr.class)) {
@@ -144,7 +144,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
             try {
                 resolvedMethodCallExpression = methodCallExpr.resolve();
                 jf = this.withinAnalysisBounds(resolvedMethodCallExpression.getPackageName() + "." + resolvedMethodCallExpression.getClassName());
-            } catch (UnsolvedSymbolException e) {
+            } catch (Throwable t) {
                 continue;
             }
             if (Objects.nonNull(jf)) {
@@ -178,8 +178,36 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
      * @return the MethodDeclaration object if exists, null otherwise
      */
     private MethodDeclaration getMethodDeclarationInCompilationUnitByName(CompilationUnit compilationUnit, String methodSimpleName) {
-        Optional<MethodDeclaration> methodOptional = compilationUnit.findAll(MethodDeclaration.class).stream().filter(methodDeclaration -> methodDeclaration.getName().asString().equals(methodSimpleName)).findFirst();
-        return methodOptional.orElse(null);
+        for (ClassOrInterfaceDeclaration classOrInterfaceDeclaration : compilationUnit.findAll(ClassOrInterfaceDeclaration.class)) {
+            Optional<MethodDeclaration> methodOptional;
+            if (classOrInterfaceDeclaration.isInterface()) {
+                return getMethodImplementation(classOrInterfaceDeclaration, methodSimpleName);
+            } else {
+                methodOptional = classOrInterfaceDeclaration.findAll(MethodDeclaration.class).stream().filter(methodDeclaration -> methodDeclaration.getName().asString().equals(methodSimpleName)).findFirst();
+                return methodOptional.orElse(null);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Searches & returns the MethodDeclaration object of the method's
+     * implementation.
+     *
+     * @param interfaceDeclaration the interface declaration object
+     * @param methodSimpleName method's simple name
+     *
+     * @return the implementation of the MethodDeclaration object if exists, null otherwise
+     */
+    private MethodDeclaration getMethodImplementation(ClassOrInterfaceDeclaration interfaceDeclaration, String methodSimpleName) {
+        try {
+            String implementationPath = InterfaceImplementations.getImplementedTypesByInterface(interfaceDeclaration.getFullyQualifiedName().get());
+            CompilationUnit cu = findCompilationUnit(implementationPath);
+            Optional<MethodDeclaration> methodOptional = cu.findAll(MethodDeclaration.class).stream().filter(methodDeclaration -> methodDeclaration.getName().asString().equals(methodSimpleName)).findFirst();
+            return methodOptional.orElse(null);
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     /**
