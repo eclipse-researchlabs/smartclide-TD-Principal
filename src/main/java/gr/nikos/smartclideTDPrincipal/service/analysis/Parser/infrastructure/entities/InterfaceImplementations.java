@@ -1,4 +1,4 @@
-package gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities;
+package gr.nikos.smartclideTDPrincipal.service.analysis.Parser.infrastructure.entities;
 
 import java.util.HashMap;
 import java.util.Map;

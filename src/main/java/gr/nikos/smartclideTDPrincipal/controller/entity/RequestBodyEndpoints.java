@@ -1,18 +1,15 @@
-package gr.nikos.smartclideTDPrincipal.Analysis;
+package gr.nikos.smartclideTDPrincipal.controller.entity;
 
-import java.util.List;
+public class RequestBodyEndpoints {
 
-public class RequestBodyEndpointsManual {
     private String sonarQubeProjectKey;
     private String gitUrl;
     private String gitToken;
-    private List<RequestBodyEachEndpoint> requestBodyEachEndpointList;
 
-    public RequestBodyEndpointsManual(String sonarQubeProjectKey, String gitUrl, String gitToken, List<RequestBodyEachEndpoint> requestBodyEachEndpointList) {
+    public RequestBodyEndpoints(String sonarQubeProjectKey, String gitUrl, String gitToken) {
         this.sonarQubeProjectKey = sonarQubeProjectKey;
         this.gitUrl = gitUrl;
         this.gitToken = gitToken;
-        this.requestBodyEachEndpointList= requestBodyEachEndpointList;
     }
 
     public String getSonarQubeProjectKey() {
@@ -27,10 +24,6 @@ public class RequestBodyEndpointsManual {
         return gitToken;
     }
 
-    public List<RequestBodyEachEndpoint> getRequestBodyEachEndpointList() {
-        return requestBodyEachEndpointList;
-    }
-
     public void setSonarQubeProjectKey(String sonarQubeProjectKey) {
         this.sonarQubeProjectKey = sonarQubeProjectKey;
     }
@@ -43,7 +36,4 @@ public class RequestBodyEndpointsManual {
         this.gitToken = gitToken;
     }
 
-    public void setRequestBodyEachEndpointList(List<RequestBodyEachEndpoint> requestBodyEachEndpointList) {
-        this.requestBodyEachEndpointList = requestBodyEachEndpointList;
-    }
 }

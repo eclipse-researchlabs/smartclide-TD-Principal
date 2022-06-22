@@ -1,5 +1,5 @@
 
-package gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities;
+package gr.nikos.smartclideTDPrincipal.service.analysis.Parser.infrastructure.entities;
 
 import com.github.javaparser.ast.CompilationUnit;
 

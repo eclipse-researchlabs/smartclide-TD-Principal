@@ -1,4 +1,4 @@
-package gr.nikos.smartclideTDPrincipal.Analysis;
+package gr.nikos.smartclideTDPrincipal.controller.entity;
 
 public class RequestBodyEachEndpoint {
     private String fileName;

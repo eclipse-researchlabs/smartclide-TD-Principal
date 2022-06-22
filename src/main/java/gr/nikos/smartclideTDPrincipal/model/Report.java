@@ -1,4 +1,4 @@
-package gr.nikos.smartclideTDPrincipal.Analysis;
+package gr.nikos.smartclideTDPrincipal.model;
 
 import java.util.List;
 

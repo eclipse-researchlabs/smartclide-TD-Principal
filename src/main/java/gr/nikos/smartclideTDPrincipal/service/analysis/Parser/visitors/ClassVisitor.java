@@ -1,4 +1,4 @@
-package gr.nikos.smartclideTDPrincipal.Parser.visitors;
+package gr.nikos.smartclideTDPrincipal.service.analysis.Parser.visitors;
 
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
@@ -7,8 +7,8 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
-import gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities.*;
-import gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities.Class;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Parser.infrastructure.entities.*;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Parser.infrastructure.entities.Class;
 
 import java.util.*;
 import java.util.stream.Collectors;

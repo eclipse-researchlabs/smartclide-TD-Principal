@@ -1,4 +1,4 @@
-package gr.nikos.smartclideTDPrincipal.Parser;
+package gr.nikos.smartclideTDPrincipal.service.analysis.Parser;
 
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
@@ -11,9 +11,9 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
-import gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities.*;
-import gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities.Class;
-import gr.nikos.smartclideTDPrincipal.Parser.visitors.ClassVisitor;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Parser.infrastructure.entities.*;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Parser.infrastructure.entities.Class;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Parser.visitors.ClassVisitor;
 
 import java.io.File;
 import java.nio.file.Paths;

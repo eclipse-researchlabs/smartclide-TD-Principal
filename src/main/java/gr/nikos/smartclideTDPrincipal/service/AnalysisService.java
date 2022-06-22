@@ -1,4 +1,4 @@
-package gr.nikos.smartclideTDPrincipal.Analysis;
+package gr.nikos.smartclideTDPrincipal.service;
 
 /*
  * Copyright (C) 2021 UoM - University of Macedonia
@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import gr.nikos.smartclideTDPrincipal.controller.entity.RequestBodyAnalysis;
+import gr.nikos.smartclideTDPrincipal.model.Issue;
+import gr.nikos.smartclideTDPrincipal.model.Metric;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -29,7 +32,6 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import gr.nikos.smartclideTDPrincipal.SmartclideTdPrincipalApplication;
 import org.springframework.util.FileSystemUtils;
 
 @Service

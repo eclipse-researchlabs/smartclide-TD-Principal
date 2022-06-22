@@ -1,4 +1,4 @@
-package gr.nikos.smartclideTDPrincipal.Analysis;
+package gr.nikos.smartclideTDPrincipal.controller;
 
 /*
  * Copyright (C) 2021 UoM - University of Macedonia
@@ -12,9 +12,15 @@ package gr.nikos.smartclideTDPrincipal.Analysis;
 
 import java.util.List;
 
+import gr.nikos.smartclideTDPrincipal.controller.entity.RequestBodyAnalysis;
+import gr.nikos.smartclideTDPrincipal.controller.entity.RequestBodyEndpoints;
+import gr.nikos.smartclideTDPrincipal.controller.entity.RequestBodyEndpointsManual;
+import gr.nikos.smartclideTDPrincipal.model.Issue;
+import gr.nikos.smartclideTDPrincipal.model.Metric;
+import gr.nikos.smartclideTDPrincipal.model.Report;
+import gr.nikos.smartclideTDPrincipal.service.AnalysisService;
+import gr.nikos.smartclideTDPrincipal.service.EndpointAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 

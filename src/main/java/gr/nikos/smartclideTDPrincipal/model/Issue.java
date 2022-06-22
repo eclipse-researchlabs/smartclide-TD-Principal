@@ -1,4 +1,4 @@
-package gr.nikos.smartclideTDPrincipal.Analysis;
+package gr.nikos.smartclideTDPrincipal.model;
 
 /*
  * Copyright (C) 2021 UoM - University of Macedonia

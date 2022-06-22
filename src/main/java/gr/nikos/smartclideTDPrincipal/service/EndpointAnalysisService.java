@@ -1,13 +1,19 @@
-package gr.nikos.smartclideTDPrincipal.Analysis;
+package gr.nikos.smartclideTDPrincipal.service;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import gr.nikos.smartclideTDPrincipal.Parser.InvestigatorFacade;
-import gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities.MethodCallSet;
-import gr.nikos.smartclideTDPrincipal.Parser.infrastructure.entities.MethodDecl;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Parser.InvestigatorFacade;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Parser.infrastructure.entities.MethodCallSet;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Parser.infrastructure.entities.MethodDecl;
+import gr.nikos.smartclideTDPrincipal.controller.entity.RequestBodyEachEndpoint;
+import gr.nikos.smartclideTDPrincipal.controller.entity.RequestBodyEndpoints;
+import gr.nikos.smartclideTDPrincipal.controller.entity.RequestBodyEndpointsManual;
+import gr.nikos.smartclideTDPrincipal.model.Issue;
+import gr.nikos.smartclideTDPrincipal.model.Metric;
+import gr.nikos.smartclideTDPrincipal.model.Report;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
