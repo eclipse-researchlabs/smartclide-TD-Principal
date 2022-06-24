@@ -23,16 +23,6 @@ public class RequestBodyAnalysis {
 		this.gitURL = gitURL;
 		this.token = token;
 	}
-
-	public String getGitName() {
-		String[] temp= this.gitURL.split("/");
-		return temp[temp.length-1].replace(".git","");
-	}
-
-	public String getGitOwner() {
-		String[] temp= this.gitURL.split("/");
-		return temp[temp.length-2];
-	}
 	
 	public String getGitURL() {
 		return gitURL;

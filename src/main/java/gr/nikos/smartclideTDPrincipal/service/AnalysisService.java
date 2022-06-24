@@ -10,21 +10,17 @@ package gr.nikos.smartclideTDPrincipal.service;
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import gr.nikos.smartclideTDPrincipal.controller.entity.RequestBodyAnalysis;
 import gr.nikos.smartclideTDPrincipal.model.Issue;
 import gr.nikos.smartclideTDPrincipal.model.Metric;
+import gr.nikos.smartclideTDPrincipal.service.analysis.SonarAnalysis;
+import gr.nikos.smartclideTDPrincipal.service.analysis.Git;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -53,83 +49,22 @@ public class AnalysisService {
             out.write("sonar.host.url="+sonarQubeUrl);
             out.close();*/
 
-			//mkdir
-			ProcessBuilder pbuilder = new ProcessBuilder("bash", "-c", "mkdir -p tmp");
-	        Process p = pbuilder.start();
-	        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-	        String line;
-	        while ((line = reader.readLine()) != null) {
-	            System.out.println(line);
-	        }
+            //Git clone
+            Git gitProject = new Git(requestBodyAnalysis.getGitURL(),requestBodyAnalysis.getToken());
+            gitProject.cloneGit();
+            report+= gitProject.getReport();
 
-            // Git Url
-            Boolean httpsGit= requestBodyAnalysis.getGitURL().contains("https://");
-            String gitUrl= requestBodyAnalysis.getGitURL().replace("https://","").replace("http://","").replace(".git","");
-            String gitToken= requestBodyAnalysis.getToken();
-            String url= "https://oauth2:" + gitToken + "@" + gitUrl;
-            if(!httpsGit){
-                url=url.replace("https://","http://");
-            }
-            String[] temp= gitUrl.split("/");
-            String gitName= temp[temp.length-1];
-
-            // Git configuration
-            System.out.println("Git configuration");
-            ProcessBuilder pbuilderGit = new ProcessBuilder("bash", "-c", "git config --global http.sslverify \"false\"");
-            Process pGit = pbuilderGit.start();
-            BufferedReader inputReaderGit = new BufferedReader(new InputStreamReader(pGit.getInputStream()));
-            String inputLineGit;
-            while ((inputLineGit = inputReaderGit.readLine()) != null) {
-                System.out.println("! " + inputLineGit);
-            }
-
-            // Clone
-            report+="url:"+url+";  ";
-            System.out.println("Clone");
-            ProcessBuilder pbuilder1 = new ProcessBuilder("bash", "-c", "cd tmp; git clone " + url);
-            Process p1 = pbuilder1.start();
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(p1.getErrorStream()));
-            String errorLine;
-            while ((errorLine = errorReader.readLine()) != null) {
-                System.out.println("~ " + errorLine);
-                report+="~ "+errorLine;
-            }
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(p1.getInputStream()));
-            String inputLine;
-            while ((inputLine = inputReader.readLine()) != null) {
-                System.out.println("! " + inputLine);
-                report+="! "+inputLine;
-            }
-	        
 	        //create sonar-project.properties
-            report+="; sonar.projectKey:"+requestBodyAnalysis.getGitOwner() +":"+ requestBodyAnalysis.getGitName()+"; ";
-	        BufferedWriter writer = new BufferedWriter(new FileWriter("/tmp/"+ requestBodyAnalysis.getGitName()+ "/sonar-project.properties"));
-            writer.write("sonar.projectKey=" + requestBodyAnalysis.getGitOwner() +":"+ requestBodyAnalysis.getGitName() + System.lineSeparator());
-            writer.append("sonar.projectName=" + requestBodyAnalysis.getGitOwner() +":"+ requestBodyAnalysis.getGitName() + System.lineSeparator());
-            writer.append("sonar.sourceEncoding=UTF-8" + System.lineSeparator());
-            writer.append("sonar.sources=." + System.lineSeparator());
-            writer.append("sonar.java.binaries=." + System.lineSeparator());
-            writer.close();
+            report+= "; sonar.projectKey:"+gitProject.getOwnerName() +":"+ gitProject.getProjectName()+"; ";
+            SonarAnalysis analysis = new SonarAnalysis(gitProject);
+            analysis.createSonarFile();
 	        
 	        //start analysis
-	        ProcessBuilder pbuilder2 = new ProcessBuilder("bash", "-c", "cd /tmp/" + requestBodyAnalysis.getGitName()+
-	        			"; /sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner");
-	        File err2 = new File("err2.txt");
-	        pbuilder2.redirectError(err2);
-	        Process p2 = pbuilder2.start();
-	        BufferedReader reader2 = new BufferedReader(new InputStreamReader(p2.getInputStream()));
-	        String line2;
-	        System.out.println("start analysis");
-	        while ((line2 = reader2.readLine()) != null) {
-	            System.out.println(line2);
-                report+="! "+line2;
-	        }
-            if(err2.exists()){
-                report+="err2 File; ";
-            }
+	        analysis.makeSonarAnalysis();
+            report+= analysis.getReport();
 
             //delete clone
-            FileSystemUtils.deleteRecursively(new File("/tmp/"+requestBodyAnalysis.getGitName()));
+            FileSystemUtils.deleteRecursively(new File(gitProject.getLocalPath()));
 		} catch (IOException e) {
             report="error::"+e.toString();
 			e.printStackTrace();

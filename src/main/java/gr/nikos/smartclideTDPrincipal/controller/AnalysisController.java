@@ -47,12 +47,6 @@ public class AnalysisController {
 	}
 
 	@CrossOrigin(origins = "*")
-	@GetMapping(path="endpoints")
-	public List<Report> getEndpointMetrics(@RequestParam(required = true) String url) {
-		return endpointAnalysisService.getEnpointMetrics(url);
-	}
-
-	@CrossOrigin(origins = "*")
 	@PostMapping(path="endpoints")
 	public List<Report> getEndpointMetricsPrivateManual(@RequestBody RequestBodyEndpointsManual requestBodyEndpointsManual) {
 		return endpointAnalysisService.getEndpointMetricsPrivateManual(requestBodyEndpointsManual);
