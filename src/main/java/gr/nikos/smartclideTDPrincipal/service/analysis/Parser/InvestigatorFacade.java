@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (C) 2021-2022 UoM - University of Macedonia
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
 package gr.nikos.smartclideTDPrincipal.service.analysis.Parser;
 
 import com.github.javaparser.ParserConfiguration;
@@ -22,19 +31,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/*
- *
- *  *
- *  *  * Copyright (C) 2021 UoM - University of Macedonia
- *  *  *
- *  *  * This program and the accompanying materials are made available under the
- *  *  * terms of the Eclipse Public License 2.0 which is available at
- *  *  * https://www.eclipse.org/legal/epl-2.0/
- *  *  *
- *  *  * SPDX-License-Identifier: EPL-2.0
- *  *
- *
- */
 
 public final class InvestigatorFacade {
 
