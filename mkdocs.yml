@@ -1,0 +1,5 @@
+site_name: SmartCLIDE TD Principal Backend Component
+repo_url: https://github.com/eclipse-researchlabs/smartclide-TD-Principal
+
+nav:
+  - TD Principal Backend: 'index.md'
